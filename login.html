@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h2>Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<script>
+async function login() {
+  const res = await fetch("http://localhost:3000/users/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+
+    const payload = JSON.parse(atob(data.token.split('.')[1]));
+
+    if (payload.role === "ADMIN") {
+      window.location = "admin.html";
+    } else {
+      window.location = "employee.html";
+    }
+  } else {
+    alert(data.message);
+  }
+}
+</script>
+</body>
+</html>

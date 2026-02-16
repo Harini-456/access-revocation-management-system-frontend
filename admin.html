@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2 style="text-align:center;">Admin Dashboard</h2>
+
+<table id="requestTable">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const token = localStorage.getItem("token");
+
+async function fetchPending() {
+  const res = await fetch("http://localhost:3000/requests/admin/myPendingRequests", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  const data = await res.json();
+  const tbody = document.querySelector("tbody");
+  tbody.innerHTML = "";
+
+  data.requests.forEach(req => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${req.title}</td>
+        <td>${req.description}</td>
+        <td>${req.status}</td>
+        <td>
+          <button class="approve" onclick="approve('${req._id}')">Approve</button>
+          <button class="reject" onclick="reject('${req._id}')">Reject</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function approve(id) {
+  await fetch(`http://localhost:3000/requests/admin/approve/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": "Bearer " + token }
+  });
+  fetchPending();
+}
+
+async function reject(id) {
+  await fetch(`http://localhost:3000/requests/admin/reject/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": "Bearer " + token }
+  });
+  fetchPending();
+}
+
+fetchPending();
+</script>
+</body>
+</html>

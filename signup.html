@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <h2>Create Account</h2>
+  <input type="text" id="name" placeholder="Full Name">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <select id="role">
+    <option value="EMPLOYEE">Employee</option>
+    <option value="ADMIN">Admin</option>
+  </select>
+
+  <button onclick="signup()">Signup</button>
+  <p>Already have account? <a href="login.html">Login</a></p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+
+
+<script>
+async function signup() {
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+
+  const response = await fetch("http://localhost:3000/users/signup", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      password: password,
+      role: role
+    })
+  });
+
+  const data = await response.json();
+  alert(data.message);
+
+  if (data.message === "success") {
+      window.location = "login.html";
+  }
+}
+</script>
+
+</body>
+</html>
