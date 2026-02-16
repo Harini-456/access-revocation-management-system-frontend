@@ -27,67 +27,72 @@
 </table>
 
 <script>
-const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-async function createRequest() {
-  const res = await fetch("http://localhost:3000/requests/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
+  async function createRequest() {
+    const title = document.getElementById("title");
+    const description = document.getElementById("description");
+    const requestedTo = document.getElementById("requestedTo");
+
+    if (!title.value || !description.value || !requestedTo.value) {
+      alert("All fields are required");
+      return;
+    }
+
+    const res = await fetch("http://localhost:3000/requests/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
   title: title.value,
   description: description.value,
-  adminName: requestedTo.value
+  adminId: requestedTo.value   
 })
 
-  });
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok) {
-    alert(data.message);
-    return;
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
+
+    alert("Request created successfully");
+    fetchRequests();
   }
 
-  alert("Request created successfully");
+  async function fetchRequests() {
+    const res = await fetch("http://localhost:3000/requests/revoke-request/myrequests", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    const tbody = document.querySelector("tbody");
+    tbody.innerHTML = "";
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      alert(errorData.message);   
+      return;                     
+    }
+
+    const data = await res.json();
+
+    if (!data.requests || !Array.isArray(data.requests)) return;
+
+    data.requests.forEach(req => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${req.title}</td>
+          <td>${req.requestType}</td>
+          <td>${req.description}</td>
+          <td>${req.status || "PENDING"}</td>
+        </tr>
+      `;
+    });
+  }
+
   fetchRequests();
-}
-
-
-async function fetchRequests() {
-  const res = await fetch("http://localhost:3000/requests/revoke-request/myrequests", {
-    headers: { "Authorization": "Bearer " + token }
-  });
-
-  const tbody = document.querySelector("tbody");
-  tbody.innerHTML = "";
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    alert(errorData.message);   
-    return;                     
-  }
-
-  const data = await res.json();
-
-  if (!data.requests || !Array.isArray(data.requests)) {
-    return;  // prevent crash
-  }
-
-  data.requests.forEach(req => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${req.title}</td>
-        <td>${req.description}</td>
-        <td>${req.status}</td>
-      </tr>
-    `;
-  });
-}
-
-fetchRequests();
 </script>
-</body>
-</html>
