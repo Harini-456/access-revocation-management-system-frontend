@@ -30,29 +30,51 @@
 const token = localStorage.getItem("token");
 
 async function createRequest() {
-  await fetch("http://localhost:3000/requests/create", {
+  const res = await fetch("http://localhost:3000/requests/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify({
-      title: title.value,
-      description: description.value,
-      requestedTo: requestedTo.value
-    })
+  title: title.value,
+  description: description.value,
+  adminName: requestedTo.value
+})
+
   });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message);
+    return;
+  }
+
+  alert("Request created successfully");
   fetchRequests();
 }
+
 
 async function fetchRequests() {
   const res = await fetch("http://localhost:3000/requests/revoke-request/myrequests", {
     headers: { "Authorization": "Bearer " + token }
   });
-  const data = await res.json();
 
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    alert(errorData.message);   
+    return;                     
+  }
+
+  const data = await res.json();
+
+  if (!data.requests || !Array.isArray(data.requests)) {
+    return;  // prevent crash
+  }
 
   data.requests.forEach(req => {
     tbody.innerHTML += `
