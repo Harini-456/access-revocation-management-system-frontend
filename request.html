@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Request Access</title>
+  <style>
+   /* ===== GLOBAL ===== */
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: linear-gradient(135deg, #eef2f7, #f8fafc);
+  color: #1e293b;
+}
+
+
+/* ===== HEADER ===== */
+
+header {
+  background-color: #1e293b;
+  color: white;
+  padding: 18px 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+
+/* ===== CENTER CONTAINER ===== */
+
+.container {
+  height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* ===== AUTH CARD ===== */
+
+.card {
+  background: white;
+  padding: 40px;
+  width: 380px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: 0.3s ease;
+}
+
+.card h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+
+/* ===== INPUT FIELDS ===== */
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+
+/* ===== BUTTON ===== */
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+
+/* ===== LINK ===== */
+
+.link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.link a {
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}
+
+
+/* ===== ERROR BOX ===== */
+
+#errorBox {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 14px;
+  text-align: center;
+}
+
+#errorBox button {
+  margin-top: 10px;
+  background-color: #dc2626;
+}
+
+#errorBox button:hover {
+  background-color: #b91c1c;
+}
+  </style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h2>Request Access</h2>
+
+<textarea id="reason" placeholder="Enter reason..." rows="5" cols="40"></textarea>
+<br><br>
+
+<button onclick="submitRequest()">Submit</button>
+
+<p id="message"></p>
+</div>
+</div>
+<script>
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+async function submitRequest() {
+  const reason = document.getElementById("reason").value;
+
+  const res = await fetch(`${BASE_URL}/requests/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ reason })
+  });
+
+  const data = await res.json();
+  document.getElementById("message").innerText = data.message;
+}
+</script>
+
+</body>
+</html>

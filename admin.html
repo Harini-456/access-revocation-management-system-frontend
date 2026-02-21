@@ -26,6 +26,19 @@
       </thead>
       <tbody id="userTable"></tbody>
     </table>
+
+    <h3>Pending Requests</h3>
+<table border="1">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Email</th>
+      <th>Reason</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="requestTable"></tbody>
+</table>
   </div>
 </div>
 
@@ -80,6 +93,91 @@ function logout() {
 }
 
 loadUsers();
+
+async function loadRequests() {
+  const res = await fetch("http://localhost:3000/requests/admin/pending", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  const data = await res.json();
+  const table = document.getElementById("requestTable");
+  table.innerHTML = "";
+
+  data.requests.forEach(r => {
+    table.innerHTML += `
+      <tr>
+        <td>${r.userId.name}</td>
+        <td>${r.userId.email}</td>
+        <td>${r.reason}</td>
+        <td>
+          <button onclick="approve('${r._id}')">Approve</button>
+          <button onclick="rejectRequest('${r._id}')">Reject</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function loadRequests() {
+  const res = await fetch("http://localhost:3000/requests/admin/pending", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  const data = await res.json();
+  const table = document.getElementById("requestTable");
+  table.innerHTML = "";
+
+  data.requests.forEach(r => {
+    table.innerHTML += `
+      <tr>
+        <td>${r.userId.name}</td>
+        <td>${r.userId.email}</td>
+        <td>${r.reason}</td>
+        <td>
+          <button onclick="approve('${r._id}')">Approve</button>
+          <button onclick="rejectRequest('${r._id}')">Reject</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+
+async function approve(id) {
+  const reply = prompt("Enter reply message:");
+
+  await fetch(`http://localhost:3000/requests/admin/approve/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ reply })
+  });
+
+  loadRequests();
+  loadUsers();
+}
+
+
+async function rejectRequest(id) {
+  const reply = prompt("Enter rejection reason:");
+
+  await fetch(`http://localhost:3000/requests/admin/reject/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ reply })
+  });
+
+  loadRequests();
+}
+
+
+loadUsers();
+loadRequests();
 </script>
 
 </body>
