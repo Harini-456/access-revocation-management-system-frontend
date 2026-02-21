@@ -6,93 +6,38 @@
 </head>
 <body>
 
-<h2 style="text-align:center;">Employee Dashboard</h2>
+<div class="dashboard">
+  <div class="navbar">
+    <h2>Employee Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-<div class="container">
-  <input type="text" id="title" placeholder="Request Title">
-  <input type="text" id="description" placeholder="Description">
-  <input type="text" id="requestedTo" placeholder="Admin ID">
-  <button onclick="createRequest()">Create Request</button>
+  <div class="card">
+    <h3>Your Access Status</h3>
+    <p id="status">Loading...</p>
+  </div>
 </div>
 
-<table id="requestTable">
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
 <script>
-  const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
 
-  async function createRequest() {
-    const title = document.getElementById("title");
-    const description = document.getElementById("description");
-    const requestedTo = document.getElementById("requestedTo");
+async function loadStatus() {
+  const res = await fetch("http://localhost:3000/requests/status", {
+    headers: { "Authorization": "Bearer " + token }
+  });
 
-    if (!title.value || !description.value || !requestedTo.value) {
-      alert("All fields are required");
-      return;
-    }
+  const data = await res.json();
+  document.getElementById("status").innerText = data.status;
+}
 
-    const res = await fetch("http://localhost:3000/requests/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({
-  title: title.value,
-  description: description.value,
-  adminId: requestedTo.value   
-})
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
 
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message);
-      return;
-    }
-
-    alert("Request created successfully");
-    fetchRequests();
-  }
-
-  async function fetchRequests() {
-    const res = await fetch("http://localhost:3000/requests/revoke-request/myrequests", {
-      headers: { "Authorization": "Bearer " + token }
-    });
-
-    const tbody = document.querySelector("tbody");
-    tbody.innerHTML = "";
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      alert(errorData.message);   
-      return;                     
-    }
-
-    const data = await res.json();
-
-    if (!data.requests || !Array.isArray(data.requests)) return;
-
-    data.requests.forEach(req => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${req.title}</td>
-          <td>${req.requestType}</td>
-          <td>${req.description}</td>
-          <td>${req.status || "PENDING"}</td>
-        </tr>
-      `;
-    });
-  }
-
-  fetchRequests();
+loadStatus();
 </script>
+
+</body>
+</html>
+
