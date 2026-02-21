@@ -59,7 +59,7 @@ async function loadUsers() {
 }
 
 async function grant(id) {
-  await fetch(`http://localhost:3000/admin/grant/${id}`, {
+  await fetch(`http://localhost:3000/requests/admin/grant/${id}`, {
     method: "PUT",
     headers: { "Authorization": "Bearer " + token }
   });
@@ -67,7 +67,7 @@ async function grant(id) {
 }
 
 async function revoke(id) {
-  await fetch(`http://localhost:3000/requests/admin/reject/${id}`, {
+  await fetch(`http://localhost:3000/requests/admin/revoke/${id}`, {
     method: "PUT",
     headers: { "Authorization": "Bearer " + token }
   });
