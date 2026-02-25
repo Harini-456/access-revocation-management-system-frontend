@@ -94,56 +94,47 @@
 
 
 <script>
-const BASE_URL = "http://localhost:3000";
-
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const errorBox = document.getElementById("errorBox");
+  const res = await fetch("http://localhost:3000/users/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  console.log("Response status:", res.status);
+
+  const data = await res.json();
+  console.log("Response data:", data);
+
+  if (res.ok) {
+    console.log("Token received:", data.token);
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.role);
+
+    console.log("Stored token:", localStorage.getItem("token"));
+
+    if (data.role === "ADMIN") window.location.href = "admin.html";
+    else window.location.href = "employee.html";
+  } else {
+  const messageBox = document.getElementById("errorBox");
   const errorMessage = document.getElementById("errorMessage");
   const requestBtn = document.getElementById("requestBtn");
 
-  // Reset UI
-  errorBox.style.display = "none";
-  requestBtn.style.display = "none";
+  messageBox.style.display = "block";
+  errorMessage.innerText = data.message;
 
-  try {
-    const res = await fetch(`${BASE_URL}/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-
-      if (data.role === "ADMIN") {
-        window.location.href = "admin.html";
-      } else {
-        window.location.href = "employee.html";
-      }
-
-    } else {
-      // Show error inside message box
-      errorBox.style.display = "block";
-      errorMessage.innerText = data.message;
-
-      // Show request button only if revoked
-      if (res.status === 403 && data.message.includes("revoked")) {
-        requestBtn.style.display = "block";
-      }
-    }
-
-  } catch (error) {
-    errorBox.style.display = "block";
-    errorMessage.innerText = "Server error. Please try again.";
+  if (data.message.includes("revoked")) {
+    requestBtn.style.display = "block";
+  } else {
+    requestBtn.style.display = "none";
   }
 }
 
+}
 function goToRequest() {
   window.location.href = "request.html";
 }

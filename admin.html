@@ -26,19 +26,45 @@
       </thead>
       <tbody id="userTable"></tbody>
     </table>
-
+  </div>
+  <div class="card">
     <h3>Pending Requests</h3>
-<table border="1">
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Email</th>
-      <th>Reason</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="requestTable"></tbody>
-</table>
+<button onclick="toggleRequests()">Show Pending Requests</button>
+
+<div id="pendingSection" style="display:none; margin-top:15px;">
+  <table border="1">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Reason</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="requestTable"></tbody>
+  </table>
+</div>
+</div>
+
+<div class="card">
+<h3>Access History</h3>
+<button onclick="toggleHistory()">Show Access History</button>
+
+<div id="historySection" style="display:none; margin-top:15px;">
+  <table border="1">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Reply</th>
+        <th>Admin</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="historyTable"></tbody>
+  </table>
+</div>
   </div>
 </div>
 
@@ -94,12 +120,31 @@ function logout() {
 
 loadUsers();
 
+let requestsVisible = false;
+
+async function toggleRequests() {
+  const section = document.getElementById("pendingSection");
+
+  if (!requestsVisible) {
+    section.style.display = "block";
+    await loadRequests();
+    requestsVisible = true;
+  } else {
+    section.style.display = "none";
+    requestsVisible = false;
+  }
+}
+
 async function loadRequests() {
   const res = await fetch("http://localhost:3000/requests/admin/pending", {
     headers: { "Authorization": "Bearer " + token }
   });
 
   const data = await res.json();
+  console.log("Requests full data:", data.requests);
+
+  console.log("Pending API response:", data);  
+
   const table = document.getElementById("requestTable");
   table.innerHTML = "";
 
@@ -116,32 +161,8 @@ async function loadRequests() {
       </tr>
     `;
   });
+  
 }
-
-async function loadRequests() {
-  const res = await fetch("http://localhost:3000/requests/admin/pending", {
-    headers: { "Authorization": "Bearer " + token }
-  });
-
-  const data = await res.json();
-  const table = document.getElementById("requestTable");
-  table.innerHTML = "";
-
-  data.requests.forEach(r => {
-    table.innerHTML += `
-      <tr>
-        <td>${r.userId.name}</td>
-        <td>${r.userId.email}</td>
-        <td>${r.reason}</td>
-        <td>
-          <button onclick="approve('${r._id}')">Approve</button>
-          <button onclick="rejectRequest('${r._id}')">Reject</button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
 
 async function approve(id) {
   const reply = prompt("Enter reply message:");
@@ -177,7 +198,48 @@ async function rejectRequest(id) {
 
 
 loadUsers();
-loadRequests();
+
+let historyVisible = false;
+
+async function toggleHistory() {
+  const section = document.getElementById("historySection");
+
+  if (!historyVisible) {
+    section.style.display = "block";
+    await loadHistory();
+    historyVisible = true;
+  } else {
+    section.style.display = "none";
+    historyVisible = false;
+  }
+}
+
+async function loadHistory() {
+  const res = await fetch("http://localhost:3000/requests/admin/history", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+
+  const data = await res.json();
+  const table = document.getElementById("historyTable");
+  table.innerHTML = "";
+
+  data.history.forEach(h => {
+    let color = h.status === "APPROVED" ? "green" : "red";
+
+    table.innerHTML += `
+      <tr>
+        <td>${h.userId.name}</td>
+        <td>${h.userId.email}</td>
+        <td style="color:${color}; font-weight:bold;">
+          ${h.status}
+        </td>
+        <td>${h.adminReply || "-"}</td>
+        <td>${h.decisionBy?.name || "-"}</td>
+        <td>${new Date(h.decisionDate).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+}
 </script>
 
 </body>

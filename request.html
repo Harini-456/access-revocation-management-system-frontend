@@ -162,21 +162,44 @@ button:hover {
 <script>
 const BASE_URL = "http://localhost:3000";
 const token = localStorage.getItem("token");
+console.log("Token being sent:", token);
 
 async function submitRequest() {
+  const token = localStorage.getItem("token");
+  console.log("Token being sent:", token); // check browser console
+
+  if (!token) {
+    alert("You must login first!");
+    window.location.href = "login.html";
+    return;
+  }
+
   const reason = document.getElementById("reason").value;
+  if (!reason.trim()) {
+    alert("Please enter a reason.");
+    return;
+  }
 
-  const res = await fetch(`${BASE_URL}/requests/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({ reason })
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/requests/create`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ reason })
+    });
 
-  const data = await res.json();
-  document.getElementById("message").innerText = data.message;
+    const data = await res.json();
+    const messageBox = document.getElementById("message");
+    messageBox.innerText = data.message;
+    messageBox.style.color = res.ok ? "green" : "red";
+  } catch (err) {
+    console.error(err);
+    const messageBox = document.getElementById("message");
+    messageBox.innerText = "Server error";
+    messageBox.style.color = "red";
+  }
 }
 </script>
 
